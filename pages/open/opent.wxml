@@ -1,0 +1,10 @@
+<!--pages/open/opent.wxml-->
+<!--index.wxml-->
+<view class="container">
+  <view class="userinfo">
+   
+  </view>
+  <view class="usermotto">
+    <text class="user-motto">111</text>
+  </view>
+</view>
