@@ -88,6 +88,7 @@ Page({
           title: message.text,
           icon: 'success',
           duration: 2000
+          
         })
       });
     }).catch(console.error);
