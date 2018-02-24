@@ -43,9 +43,9 @@ Page({
         })
       }
     })
-    // wx.navigateTo({
-    //   url: '../opent/opent'
-    // })
+    wx.navigateTo({
+      url: '../opent/opent'
+    })
   },
   onLoad: function () {
     if (app.globalData.userInfo) {
@@ -80,6 +80,7 @@ Page({
     this.loginInit()
    
   },
+  // webscoket 服务启动
   realtimeMessageInit:function(currentuser){// 用户id
     app.globalData.realtime.createIMClient("currentuser").then(function (jerry) {
       jerry.on('message', function (message, conversation) {
@@ -93,18 +94,18 @@ Page({
       });
     }).catch(console.error);
 
-    app.globalData.realtime.createIMClient('Tom').then(function (tom) {
-      // 创建与Jerry之间的对话
-      return tom.createConversation({
-        members: ['currentuser'],
-        name: 'Tom & Jerry',
-      });
-    }).then(function (conversation) {
-      // 发送消息
-      return conversation.send(new app.globalData.TextMessage('耗子，起床！'));
-    }).then(function (message) {
-      console.log('Tom & Jerry', '发送成功！');
-    }).catch(console.error);
+    // app.globalData.realtime.createIMClient('Tom').then(function (tom) {
+    //   // 创建与Jerry之间的对话
+    //   return tom.createConversation({
+    //     members: ['currentuser'],
+    //     name: 'Tom & Jerry',
+    //   });
+    // }).then(function (conversation) {
+    //   // 发送消息
+    //   return conversation.send(new app.globalData.TextMessage('耗子，起床！'));
+    // }).then(function (message) {
+    //   console.log('Tom & Jerry', '发送成功！');
+    // }).catch(console.error);
   },
   loginInit:function(){
 
@@ -113,14 +114,14 @@ Page({
 
       this.realtimeMessageInit(app.globalData.user.authData.lc_weapp.openid)
       wx.request({
-        url: 'https://d.apicloud.com/mcm/api/device?filter={"where":{"uuid":"' + app.globalData.user.authData.lc_weapp.openid + '"},"limit":10}', //仅为示例，并非真实的接口地址
+        url: 'https://d.apicloud.com/mcm/api/homeuser?filter={"where":{"uuid":"' + app.globalData.user.authData.lc_weapp.openid + '"},"limit":3}',  
         method: 'GET',
-
+      
         header: util.getheader(),
-        success: function (res) {
+        success: function (res) { 
           console.log(res.data)
           wx.showToast({
-            title: "111",
+            title: res.data,
             icon: 'success',
             duration: 2000
           })
