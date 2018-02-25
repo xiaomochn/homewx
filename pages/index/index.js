@@ -7,15 +7,19 @@ const util = require('../../utils/util.js')
 Page({
   data: {
     motto: 'Hello World',
+    statustext:"正在查询", 
     userInfo: {},
     allInfo:{},
     hasUserInfo: false,
     canIUse: wx.canIUse('button.open-type.getUserInfo')
   },
   //事件处理函数
-  bindViewTap: function() {
+  bindViewTap:function(){
+    this.sendJpushMessage("opendoor\r\n")
+  }, 
+  sendJpushMessage: function(message) {
     wx.request({
-      url: 'https://api.jpush.cn/v3/push', //仅为示例，并非真实的接口地址
+      url: 'https://api.jpush.cn/v3/push', 
       method:'POST',
       data: {
         "platform": ["android"],
@@ -25,7 +29,7 @@ Page({
           "extras":{
             "c": app.globalData.user.authData.lc_weapp.openid,
 "d":"1",
-"e":"opendoor",
+            "e": message,
             "f": app.globalData.userAllInfo.userInfo.nickName
           }
         }
@@ -43,9 +47,9 @@ Page({
         })
       }
     })
-    wx.navigateTo({
-      url: '../opent/opent'
-    })
+    // wx.navigateTo({
+    //   url: '../opent/opent'
+    // }) 
   },
   onLoad: function () {
     if (app.globalData.userInfo) {
@@ -81,31 +85,49 @@ Page({
    
   },
   // webscoket 服务启动
-  realtimeMessageInit:function(currentuser){// 用户id
-    app.globalData.realtime.createIMClient("currentuser").then(function (jerry) {
+ 
+  realtimeMessageInit:function(currentuser){// 用户id 
+ let  _this = this
+ console.log(currentuser)
+  app.globalData.realtime.createIMClient(currentuser).then( jerry=> {
       jerry.on('message', function (message, conversation) {
-        console.log('Message received: ' + message.text);
-        wx.showToast({
-          title: message.text,
-          icon: 'success',
-          duration: 2000
-          
+        console.log(message.content._lctext)
+        let msg = message.content._lctext
+        // let msginfo= {
+        //   "allow":"门已开",
+        //   "notallow": "门已锁" 
+
+        // } 
+       
+        // console.log(msginfo.a)
+         
+        _this.setData({
+          statustext : message.content._lctext
         })
+      
+       
+        // this.message2Activity(message)
       });
     }).catch(console.error);
+    
 
-    // app.globalData.realtime.createIMClient('Tom').then(function (tom) {
+
+    // app.globalData.realtime.createIMClient(currentuser+"1").then(function (tom) {
     //   // 创建与Jerry之间的对话
     //   return tom.createConversation({
-    //     members: ['currentuser'],
+    //     members: [currentuser],
     //     name: 'Tom & Jerry',
     //   });
     // }).then(function (conversation) {
-    //   // 发送消息
+    //   // 发送消息 
     //   return conversation.send(new app.globalData.TextMessage('耗子，起床！'));
-    // }).then(function (message) {
+    // }).then(function (message) { 
     //   console.log('Tom & Jerry', '发送成功！');
     // }).catch(console.error);
+  },
+
+  message2Activity: function (message) {
+    console.log(message)
   },
   loginInit:function(){
 
@@ -116,19 +138,19 @@ Page({
       wx.request({
         url: 'https://d.apicloud.com/mcm/api/homeuser?filter={"where":{"uuid":"' + app.globalData.user.authData.lc_weapp.openid + '"},"limit":3}',  
         method: 'GET',
-      
         header: util.getheader(),
-        success: function (res) { 
-          console.log(res.data)
-          wx.showToast({
-            title: res.data,
-            icon: 'success',
-            duration: 2000
-          })
+        success: res=> {  
+          console.log("1111"+res.data[0].deviceid)
+          if (res.data.length>0){
+            this.realtimeMessageInit(res.data[0].deviceid)
+            this.sendJpushMessage("statusn:lock\r\n")
+          }
+         
         }
-      })
+      }) 
     }).catch(console.error);
   },
+  
   getUserInfo: function(e) {
     console.log(e)
     app.globalData.userInfo = e.detail.userInfo
